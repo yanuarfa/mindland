@@ -15,7 +15,7 @@ import Articles from "./pages/articles/Articles";
 import Doctor from "./pages/doctor/Doctor";
 import Detailarticles from "./pages/articles/Detailarticles";
 import User from "./pages/user/User";
-import Chat from "./pages/ai/Chat";
+import Chat from "./pages/Ai/Chat";
 import ResetPassword from "./pages/auth/Reset";
 import NotFound from "./pages/NotFound";
 import CheckDepression from "./pages/mentaltest/CheckDepression";
