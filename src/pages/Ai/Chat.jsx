@@ -1,7 +1,10 @@
 import { Button } from "flowbite-react";
 import { HiPaperAirplane } from "react-icons/hi";
 import { useState, useRef, useEffect } from "react";
-import { Configuration, OpenAIApi } from "openai";
+// Jika menggunakan openai silahkan jalankan npm install openai@3.1.0
+// import { Configuration, OpenAIApi } from "openai";
+// Menggunakan Gemini AI
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useNavigate } from "react-router-dom";
 
 import Sendchat from "../../components/chat-bubble/Sendchat";
@@ -46,40 +49,73 @@ function Chat() {
       setUserInput("");
       setLoading(true);
 
-      // Pass the user's input to handleOpenAi
-      await handleOpenAi(newUserInput.text);
+      // Uncomment jika menggunakan openai
+      // await handleOpenAi(newUserInput.text);
+
+      // Menggunakan Gemini AI
+      await handleAI(newUserInput.text);
 
       setLoading(false);
     }
   };
+  // Jika menggunakan openai silahkan uncomment code dibawah ini
+  // const config = new Configuration({
+  //   apiKey: import.meta.env.VITE_APP_MIND_LAND_KEY,
+  // });
+  // const openai = new OpenAIApi(config);
 
-  console.log(messages);
+  // const handleOpenAi = async (input) => {
+  //   try {
+  //     const response = await openai.createCompletion({
+  //       model: "text-davinci-002",
+  //       prompt: `${input}
+  //       jelaskan secara singkat seakan kamu adalah seorang mental health konsultan
+  //       `,
+  //       temperature: 0.5,
+  //       max_tokens: 500,
+  //     });
 
-  const config = new Configuration({
-    apiKey: import.meta.env.VITE_APP_MIND_LAND_KEY,
-  });
-  const openai = new OpenAIApi(config);
+  //     const newResponse = { text: response.data.choices[0].text, type: "ai" };
 
-  const handleOpenAi = async (input) => {
+  //     // Use the functional form of setMessages to ensure correct state update
+  //     setMessages((prevMessages) => [...prevMessages, newResponse]);
+  //   } catch (error) {
+  //     console.error("Error fetching AI response:", error);
+  //     const errorMessage = { text: "Error fetching AI response", type: "ai" };
+
+  //     // Use the functional form of setMessages to ensure correct state update
+  //     setMessages((prevMessages) => [...prevMessages, errorMessage]);
+  //   }
+
+  //   setLoading(false);
+  //   scrollToBottom();
+  // };
+
+  // Menggunakan Gemini AI
+  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_APP_MIND_LAND_KEY);
+
+  const handleAI = async (input) => {
     try {
-      const response = await openai.createCompletion({
-        model: "text-davinci-002",
-        prompt: `${input} 
-        jelaskan secara singkat seakan kamu adalah seorang mental health konsultan
-        `,
-        temperature: 0.5,
-        max_tokens: 500,
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-pro-latest",
+        systemInstruction: {
+          role: "model",
+          parts: [
+            {
+              text: "Kamu seorang dokter kesehatan mental. Namamu adalah rafiq. Kamu bisa curhat ke aku, aku akan dengarkan keluhanmu. kamu hanya menjawab pertanyaan seputar kesehatan mental. Berikan solusi ketika kamu merasa perlu memberikan solusi.",
+            },
+          ],
+        },
       });
+      const result = await model.generateContent(input);
+      const response = result.response;
+      const text = response.text();
 
-      const newResponse = { text: response.data.choices[0].text, type: "ai" };
-
-      // Use the functional form of setMessages to ensure correct state update
+      const newResponse = { text, type: "ai" };
       setMessages((prevMessages) => [...prevMessages, newResponse]);
     } catch (error) {
       console.error("Error fetching AI response:", error);
       const errorMessage = { text: "Error fetching AI response", type: "ai" };
-
-      // Use the functional form of setMessages to ensure correct state update
       setMessages((prevMessages) => [...prevMessages, errorMessage]);
     }
 
